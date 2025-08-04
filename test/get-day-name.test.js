@@ -1,7 +1,7 @@
 'use strict'
 
 const { describe, it } = require('node:test')
-const {getDayName, i18n } = require('../index.js')
+const { getDayName, i18n } = require('../index.js')
 
 describe('getDayName', () => {
   it('should return "Today" for today\'s date', (t) => {

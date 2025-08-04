@@ -5,13 +5,7 @@ declare class DateFormatter {
      * @param {'UTC'|'GMT'} mode
      */
     constructor(mask: string | ((date: Date) => string), mode?: "UTC" | "GMT");
-    i18n: {
-        readonly dayNamesShort: readonly ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        readonly dayNamesLong: readonly ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        readonly monthNamesShort: readonly ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        readonly monthNamesLong: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        readonly timeNames: readonly ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
-    };
+    i18n: I18n;
     /**
      * @returns {(date: Date) => string}
      */
@@ -284,7 +278,7 @@ declare class DateFormatter {
     #private;
 }
 declare namespace DateFormatter {
-    export { DateFormatter as default, DateFormatter, dateFormat, getWeekOfYear, getDayName, standardMasks, standardMaskNames, i18n, DateFn };
+    export { DateFormatter as default, DateFormatter, dateFormat, getWeekOfYear, getDayName, standardMasks, standardMaskNames, i18n, I18n, DateFn };
 }
 /**
  * @param {string | number | Date} [date=new Date()]
@@ -308,23 +302,44 @@ declare function getWeekOfYear(date: Date): number;
  * @param  {Date} options.date - The date
  * @param  {function} options.D - Function to get the day of the week (0-6)
  * @param  {boolean} options.short - Whether to return short names (Tdy, Ysd, Tmw)
- * @param  {typeof defaultI18n} options.i18n - Object containing i18n day names
+ * @param  {I18n} options.i18n - Object containing i18n day names
  * @return {String}
  */
 declare function getDayName({ date, D, short, i18n }: {
     date: Date;
     D: Function;
     short: boolean;
-    i18n: typeof defaultI18n;
+    i18n: I18n;
 }): string;
 declare const standardMasks: Record<"default" | "shortDate" | "paddedShortDate" | "mediumDate" | "longDate" | "fullDate" | "isoDate" | "shortTime" | "mediumTime" | "longTime" | "isoTime" | "isoDateTime" | "isoUtcDateTime" | "expiresHeaderFormat", (this: DateFormatter, date: Date) => string>;
 declare const standardMaskNames: readonly ["default", "shortDate", "paddedShortDate", "mediumDate", "longDate", "fullDate", "isoDate", "shortTime", "mediumTime", "longTime", "isoTime", "isoDateTime", "isoUtcDateTime", "expiresHeaderFormat"];
 declare namespace i18n {
-    let dayNamesShort: readonly ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    let dayNamesLong: readonly ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    let monthNamesShort: readonly ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    let monthNamesLong: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    let timeNames: readonly ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
+    let dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    let dayNamesLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    let monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let monthNamesLong: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
 }
+type I18n = {
+    /**
+     * - Short names of the days of the week
+     */
+    dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    /**
+     * - Long names of the days of the week
+     */
+    dayNamesLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    /**
+     * - Short names of the months
+     */
+    monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    /**
+     * - Long names of the months
+     */
+    monthNamesLong: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    /**
+     * - Time names (am, pm, etc.)
+     */
+    timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
+};
 type DateFn = "getDate" | "getDay" | "getMonth" | "getFullYear" | "getHours" | "getMinutes" | "getSeconds" | "getMilliseconds" | "getTimezoneOffset";
-declare namespace defaultI18n { }

@@ -70,58 +70,23 @@ const GMT_FNS = {
   getTimezoneOffset: Date.prototype.getTimezoneOffset.call.bind(Date.prototype.getTimezoneOffset),
 }
 
-const defaultI18n = /** @type {const} */ ({
-  dayNamesShort: [
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-  ],
-  dayNamesLong: [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ],
-  monthNamesShort: [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ],
-  monthNamesLong: [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ],
-  timeNames: ['a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM'],
-})
+/**
+ * @typedef {Object} I18n
+ * @property {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']} dayNamesShort - Short names of the days of the week
+ * @property {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']} dayNamesLong - Long names of the days of the week
+ * @property {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']} monthNamesShort - Short names of the months
+ * @property {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']} monthNamesLong - Long names of the months
+ * @property {['a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM']} timeNames - Time names (am, pm, etc.)
+ */
 
-function getI18n() {
-  return /** @type {typeof defaultI18n} */ (JSON.parse(JSON.stringify(defaultI18n)))
+function getI18n () {
+  return /** @type {I18n} */ ({
+    dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    dayNamesLong: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    monthNamesLong: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    timeNames: ['a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM'],
+  })
 }
 
 /** @type {Map<number, Date>} */
@@ -186,7 +151,7 @@ const getWeekOfYear = (date) => {
  * @param  {Date} options.date - The date
  * @param  {function} options.D - Function to get the day of the week (0-6)
  * @param  {boolean} options.short - Whether to return short names (Tdy, Ysd, Tmw)
- * @param  {typeof defaultI18n} options.i18n - Object containing i18n day names
+ * @param  {I18n} options.i18n - Object containing i18n day names
  * @return {String}
  */
 const getDayName = ({ date, D, short, i18n }) => {
@@ -284,7 +249,7 @@ class DateFormatter {
    * @param {string|((date: Date) => string)} mask
    * @param {'UTC'|'GMT'} mode
    */
-  constructor(mask, mode = 'GMT') {
+  constructor (mask, mode = 'GMT') {
     if (typeof mode === 'string') {
       const maybeValidMode = mode.toUpperCase()
       if (maybeValidMode !== 'GMT' && maybeValidMode !== 'UTC') {
@@ -324,7 +289,7 @@ class DateFormatter {
     } else if (typeof mask === 'function') {
       this.#format = mask
     } else if (typeof mask === 'undefined') {
-      this.#format = standardMasks.default;
+      this.#format = standardMasks.default
     } else {
       throw TypeError('Mask must be a string or a function')
     }
@@ -342,7 +307,7 @@ class DateFormatter {
     }
   }
 
-  #tokenize() {
+  #tokenize () {
     const tokenRE = /d{1,4}|D{3,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|W{1,2}|[LlopSZN]|"[^"]*"|'[^']*'/g
     let match
     let pos = 0
@@ -471,7 +436,7 @@ class DateFormatter {
     }
   }
 
-  #validateDate(date) {
+  #validateDate (date) {
     if (date instanceof Date) {
       if (Number.isNaN(date.getTime())) {
         throw TypeError('Invalid date')
@@ -492,7 +457,7 @@ class DateFormatter {
   /**
    * @returns {(date: Date) => string}
    */
-  get format() {
+  get format () {
     return this.#format
   }
 
@@ -504,7 +469,7 @@ class DateFormatter {
    * '15'|'16'|'17'|'18'|'19'|'20'|'21'|'22'|'23'|'24'|'25'|'26'|'27'|'28'|
    * '29'|'30'|'31'}
    */
-  d(date) {
+  d (date) {
     return /** @type {*} */ (PAD_0[this.#d(date)])
   }
 
@@ -516,7 +481,7 @@ class DateFormatter {
    * '13'|'14'|'15'|'16'|'17'|'18'|'19'|'20'|'21'|'22'|'23'|'24'|'25'|'26'|
    * '27'|'28'|'29'|'30'|'31'}
    */
-  dd(date) {
+  dd (date) {
     return /** @type {*} */ (PAD_2[this.#d(date)])
   }
 
@@ -526,7 +491,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'Sun'|'Mon'|'Tue'|'Wed'|'Thu'|'Fri'|'Sat'}
    */
-  ddd(date) {
+  ddd (date) {
     return this.i18n.dayNamesShort[this.#D(date)]
   }
 
@@ -536,7 +501,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'Sunday'|'Monday'|'Tuesday'|'Wednesday'|'Thursday'|'Friday'|'Saturday'}
    */
-  dddd(date) {
+  dddd (date) {
     return this.i18n.dayNamesLong[this.#D(date)]
   }
 
@@ -547,7 +512,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {ReturnType<typeof this.ddd>|'Tdy'|'Ysd'|'Tmw'}
    */
-  DDD(date) {
+  DDD (date) {
     return /** @type {*} */(getDayName({
       date,
       D: this.#D.bind(this),
@@ -563,7 +528,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {ReturnType<typeof this.ddd>|'Today'|'Yesterday'|'Tomorrow'}
    */
-  DDDD(date) {
+  DDDD (date) {
     return /** @type {*} */(getDayName({
       date,
       D: this.#D.bind(this),
@@ -578,7 +543,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'}
    */
-  h(date) {
+  h (date) {
     return HOURS_H[this.#H(date)]
   }
 
@@ -587,7 +552,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'01'|'02'|'03'|'04'|'05'|'06'|'07'|'08'|'09'|'10'|'11'|'12'}
    */
-  hh(date) {
+  hh (date) {
     return HOURS_H_PAD_2[this.#H(date)]
   }
 
@@ -598,7 +563,7 @@ class DateFormatter {
    * @returns {'0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'|'13'|
    * '14'|'15'|'16'|'17'|'18'|'19'|'20'|'21'|'22'|'23'}
    */
-  H(date) {
+  H (date) {
     return /** @type {*} */ (PAD_0[this.#H(date)])
   }
 
@@ -609,7 +574,7 @@ class DateFormatter {
    * @returns {'00'|'01'|'02'|'03'|'04'|'05'|'06'|'07'|'08'|'09'|'10'|'11'|
    * '12'|'13'|'14'|'15'|'16'|'17'|'18'|'19'|'20'|'21'|'22'|'23'}
    */
-  HH(date) {
+  HH (date) {
     return /** @type {*} */ (PAD_2[this.#H(date)])
   }
 
@@ -619,7 +584,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  l(date) {
+  l (date) {
     return PAD_3[this.#L(date)]
   }
 
@@ -629,7 +594,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  L(date) {
+  L (date) {
     return MILLISECONDS_L[this.#L(date)]
   }
 
@@ -639,7 +604,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'}
    */
-  m(date) {
+  m (date) {
     return /** @type {*} */ (PAD_0[this.#m(date) + 1])
   }
 
@@ -649,7 +614,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'01'|'02'|'03'|'04'|'05'|'06'|'07'|'08'|'09'|'10'|'11'|'12'}
    */
-  mm(date) {
+  mm (date) {
     return /** @type {*} */ (PAD_2[this.#m(date) + 1])
   }
 
@@ -659,7 +624,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  mmm(date) {
+  mmm (date) {
     return this.i18n.monthNamesShort[this.#m(date)]
   }
 
@@ -669,7 +634,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  mmmm(date) {
+  mmmm (date) {
     return this.i18n.monthNamesLong[this.#m(date)]
   }
 
@@ -683,7 +648,7 @@ class DateFormatter {
    * '40'|'41'|'42'|'43'|'44'|'45'|'46'|'47'|'48'|'49'|'50'|'51'|'52'|'53'|
    * '54'|'55'|'56'|'57'|'58'|'59'}
    */
-  M(date) {
+  M (date) {
     return /** @type {*} */ (PAD_0[this.#M(date)])
   }
 
@@ -697,7 +662,7 @@ class DateFormatter {
    * '40'|'41'|'42'|'43'|'44'|'45'|'46'|'47'|'48'|'49'|'50'|'51'|'52'|'53'|
    * '54'|'55'|'56'|'57'|'58'|'59'}
    */
-  MM(date) {
+  MM (date) {
     return /** @type {*} */ (PAD_2[this.#M(date)])
   }
 
@@ -707,7 +672,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'1'|'2'|'3'|'4'|'5'|'6'|'7'}
    */
-  N(date) {
+  N (date) {
     return DAY_OF_WEEK[this.#D(date)]
   }
 
@@ -717,7 +682,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  o(date) {
+  o (date) {
     return TIMEZONE_OFFSET_O.get(this.#o(date))
   }
 
@@ -727,7 +692,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  p(date) {
+  p (date) {
     return TIMEZONE_OFFSET_P.get(this.#o(date))
   }
 
@@ -741,7 +706,7 @@ class DateFormatter {
    * '42'|'43'|'44'|'45'|'46'|'47'|'48'|'49'|'50'|'51'|'52'|'53'|'54'|'55'|
    * '56'|'57'|'58'|'59'}
    */
-  s(date) {
+  s (date) {
     return /** @type {*} */ (PAD_0[this.#s(date)])
   }
 
@@ -755,7 +720,7 @@ class DateFormatter {
    * '40'|'41'|'42'|'43'|'44'|'45'|'46'|'47'|'48'|'49'|'50'|'51'|'52'|'53'|
    * '54'|'55'|'56'|'57'|'58'|'59'}
    */
-  ss(date) {
+  ss (date) {
     return /** @type {*} */ (PAD_2[this.#s(date)])
   }
 
@@ -765,7 +730,7 @@ class DateFormatter {
    * @param {Date} date
    * @return {'st'|'nd'|'rd'|'th'}
    */
-  S(date) {
+  S (date) {
     return DATE_SUFFIX[this.#d(date)]
   }
 
@@ -775,7 +740,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'a'|'p'}
    */
-  t(date) {
+  t (date) {
     return this.#H(date) < 12
       ? this.i18n.timeNames[0]
       : this.i18n.timeNames[1]
@@ -787,7 +752,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'am'|'pm'}
    */
-  tt(date) {
+  tt (date) {
     return this.#H(date) < 12
       ? this.i18n.timeNames[2]
       : this.i18n.timeNames[3]
@@ -799,7 +764,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'A'|'P'}
    */
-  T(date) {
+  T (date) {
     return this.#H(date) < 12
       ? this.i18n.timeNames[4]
       : this.i18n.timeNames[5]
@@ -811,7 +776,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'AM'|'PM'}
    */
-  TT(date) {
+  TT (date) {
     return this.#H(date) < 12
       ? this.i18n.timeNames[6]
       : this.i18n.timeNames[7]
@@ -826,7 +791,7 @@ class DateFormatter {
    * '30'|'31'|'32'|'33'|'34'|'35'|'36'|'37'|'38'|'39'|'40'|'41'|'42'|'43'|
    * '44'|'45'|'46'|'47'|'48'|'49'|'50'|'51'|'52'|'53'}
    */
-  W(date) {
+  W (date) {
     return /** @type {*} */ (PAD_0[getWeekOfYear(date)])
   }
 
@@ -839,7 +804,7 @@ class DateFormatter {
    * '27'|'28'|'29'|'30'|'31'|'32'|'33'|'34'|'35'|'36'|'37'|'38'|'39'|'40'|
    * '41'|'42'|'43'|'44'|'45'|'46'|'47'|'48'|'49'|'50'|'51'|'52'|'53'}
    */
-  WW(date) {
+  WW (date) {
     return /** @type {*} */ (PAD_2[getWeekOfYear(date)])
   }
 
@@ -856,7 +821,7 @@ class DateFormatter {
    * '82'|'83'|'84'|'85'|'86'|'87'|'88'|'89'|'90'|'91'|'92'|'93'|'94'|'95'|
    * '96'|'97'|'98'|'99'}
    */
-  yy(date) {
+  yy (date) {
     return /** @type {*} */ (PAD_2[this.#yyyy(date) % 100])
   }
 
@@ -866,7 +831,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {string}
    */
-  yyyy(date) {
+  yyyy (date) {
     return PAD_4[this.#yyyy(date)]
   }
 
@@ -874,7 +839,7 @@ class DateFormatter {
    * @param {Date} date
    * @returns {'UTC'|`GMT${string}`}
    */
-  Z(date) {
+  Z (date) {
     if (this.#mode === 'UTC') {
       return 'UTC'
     }
@@ -888,7 +853,7 @@ class DateFormatter {
  * @param {boolean} [utc=false]
  * @param {boolean} [gmt=true]
  */
-function dateFormat(date, mask, utc, gmt) {
+function dateFormat (date, mask, utc, gmt) {
   if (typeof date === 'string' || typeof date === 'number') {
     date = new Date(date)
   }
