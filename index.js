@@ -840,10 +840,11 @@ class DateFormatter {
    * @returns {'UTC'|`GMT${string}`}
    */
   Z (date) {
-    if (this.#mode === 'UTC') {
+    const offset = this.#o(date)
+    if (this.#mode === 'UTC' || offset === 0) {
       return 'UTC'
     }
-    return `GMT${this.o(date)}`
+    return `GMT${TIMEZONE_OFFSET_O.get(offset)}`
   }
 }
 
