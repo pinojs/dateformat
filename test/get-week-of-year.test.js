@@ -4,6 +4,8 @@ const { describe, it } = require('node:test')
 const weekOfYear = require('./fixtures/week-of-year.json')
 const getWeekOfYear = require('../lib/get-week-of-year')
 
+process.env.TZ = 'UTC'
+
 describe('getWeekOfYear', () => {
   it('should return the correct week of year', (t) => {
     for (const [date, expected] of weekOfYear) {
