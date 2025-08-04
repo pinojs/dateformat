@@ -303,7 +303,7 @@ declare function getWeekOfYear(date: Date): number;
  * @param  {function} options.D - Function to get the day of the week (0-6)
  * @param  {boolean} options.short - Whether to return short names (Tdy, Ysd, Tmw)
  * @param  {I18n} options.i18n - Object containing i18n day names
- * @return {String}
+ * @return {string}
  */
 declare function getDayName({ date, D, short, i18n }: {
     date: Date;
