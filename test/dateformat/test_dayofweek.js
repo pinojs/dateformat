@@ -1,3 +1,5 @@
+'use strict'
+
 const { describe, it } = require('node:test')
 
 const dateFormat = require('./../../lib/date-format.js')
