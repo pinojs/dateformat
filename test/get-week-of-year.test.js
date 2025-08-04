@@ -1,8 +1,8 @@
 'use strict'
 
 const { describe, it } = require('node:test')
-const weekOfYear = require('./fixtures/week-of-year.json')
 const getWeekOfYear = require('../lib/get-week-of-year')
+const weekOfYear = require('./fixtures/week-of-year.json')
 
 process.env.TZ = 'UTC'
 
