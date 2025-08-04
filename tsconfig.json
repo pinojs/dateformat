@@ -9,7 +9,6 @@
             "node"
         ],
         "declaration": true,
-        "outDir": "lib",
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
         "allowJs": true,
