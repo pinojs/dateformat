@@ -1,6 +1,5 @@
 const { describe, it } = require('node:test')
-const { dateFormat } = require('../../lib/date-format.js')
-const { standardMasks: masks } = require('../../lib/standard-masks.js')
+const { dateFormat, standardMasks: masks } = require('../../index.js')
 
 const expects = {
   default: 'Sat Mar 08 2014 13:19:44',

@@ -1,6 +1,6 @@
 const { describe, it } = require('node:test')
 
-const dateFormat = require('./../../lib/date-format.js')
+const { dateFormat } = require('./../../index.js')
 
 describe('isoUtcDateTime', function () {
   it('should correctly format the timezone part', (t) => {

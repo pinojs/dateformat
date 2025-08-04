@@ -2,7 +2,7 @@
 
 const { describe, it } = require('node:test')
 
-const dateFormat = require('./../../lib/date-format.js')
+const { dateFormat } = require('./../../index.js')
 
 describe('dayOfWeek', function () {
   it('should correctly format the timezone part', function (t) {

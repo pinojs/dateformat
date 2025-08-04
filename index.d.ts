@@ -284,15 +284,15 @@ declare class DateFormatter {
     #private;
 }
 declare namespace DateFormatter {
-    export { DateFormatter as default, DateFormatter, dateFormat, getWeekOfYear, getDayName, DateFn };
+    export { DateFormatter as default, DateFormatter, dateFormat, getWeekOfYear, getDayName, standardMasks, standardMaskNames, i18n, DateFn };
 }
 /**
- * @param {string | number | Date} date
- * @param {string} mask
+ * @param {string | number | Date} [date=new Date()]
+ * @param {string} [mask='default']
  * @param {boolean} [utc=false]
  * @param {boolean} [gmt=true]
  */
-declare function dateFormat(date: string | number | Date, mask: string, utc?: boolean, gmt?: boolean): string;
+declare function dateFormat(date?: string | number | Date, mask?: string, utc?: boolean, gmt?: boolean): string;
 /**
  * Get the ISO 8601 week number for a given date.
  *
@@ -317,11 +317,14 @@ declare function getDayName({ date, D, short, i18n }: {
     short: boolean;
     i18n: typeof defaultI18n;
 }): string;
-type DateFn = "getDate" | "getDay" | "getMonth" | "getFullYear" | "getHours" | "getMinutes" | "getSeconds" | "getMilliseconds" | "getTimezoneOffset";
-declare namespace defaultI18n {
+declare const standardMasks: Record<"default" | "shortDate" | "paddedShortDate" | "mediumDate" | "longDate" | "fullDate" | "isoDate" | "shortTime" | "mediumTime" | "longTime" | "isoTime" | "isoDateTime" | "isoUtcDateTime" | "expiresHeaderFormat", (this: DateFormatter, date: Date) => string>;
+declare const standardMaskNames: readonly ["default", "shortDate", "paddedShortDate", "mediumDate", "longDate", "fullDate", "isoDate", "shortTime", "mediumTime", "longTime", "isoTime", "isoDateTime", "isoUtcDateTime", "expiresHeaderFormat"];
+declare namespace i18n {
     let dayNamesShort: readonly ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     let dayNamesLong: readonly ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     let monthNamesShort: readonly ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     let monthNamesLong: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     let timeNames: readonly ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
 }
+type DateFn = "getDate" | "getDay" | "getMonth" | "getFullYear" | "getHours" | "getMinutes" | "getSeconds" | "getMilliseconds" | "getTimezoneOffset";
+declare namespace defaultI18n { }

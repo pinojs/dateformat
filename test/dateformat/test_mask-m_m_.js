@@ -1,5 +1,5 @@
 const { describe, it } = require('node:test')
-const dateFormat = require('./../../lib/date-format.js')
+const { dateFormat } = require('./../../index.js')
 
 describe("Mask: 'MM'", function () {
   it("should format '1876-07-11T13:19:36.341' as '19'", (t) => {

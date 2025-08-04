@@ -1,6 +1,6 @@
 const { describe, it, beforeEach } = require('node:test')
 
-const dateFormat = require('../../lib/date-format.js')
+const { dateFormat } = require('../../index.js')
 
 const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const dayNamesLong = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']

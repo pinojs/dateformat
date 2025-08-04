@@ -1,5 +1,5 @@
 const { describe, it } = require('node:test')
-const dateFormat = require('./../../lib/date-format.js')
+const { dateFormat } = require('./../../index.js')
 
 describe("Mask: 'Z'", { skip: true }, function (t) {
   it("should format 'Tue Sep 08 2020 13:26:11 GMT-0500 (Central Daylight Time)' as 'CDT'", (t) => {
