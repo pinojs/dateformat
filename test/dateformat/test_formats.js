@@ -1,5 +1,5 @@
 const { describe, it } = require('node:test')
-const { dateFormat, standardMasks: masks } = require('../../index.js')
+const { dateformat, standardMasks: masks } = require('../../index.js')
 
 const expects = {
   default: 'Sat Mar 08 2014 13:19:44',
@@ -61,14 +61,14 @@ describe('dateformat([now], [mask])', function () {
         )
         expected = now.toISOString().replace(/\.000/g, '')
       }
-      const actual = dateFormat(now, key)
+      const actual = dateformat(now, key)
       t.assert.strictEqual(actual, expected)
     })
   })
   it('should use `default` mask, when `mask` is empty', (t) => {
     const now = new Date(2014, 2, 8, 13, 19, 44)
     const expected = expects['default']
-    const actual = dateFormat(now)
+    const actual = dateformat(now)
 
     t.assert.strictEqual(actual, expected)
   })
