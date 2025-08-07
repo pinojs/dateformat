@@ -278,7 +278,7 @@ declare class DateFormatter {
     #private;
 }
 declare namespace DateFormatter {
-    export { DateFormatter as default, DateFormatter, dateFormat, getWeekOfYear, getDayName, standardMasks, standardMaskNames, i18n, I18n, DateFn };
+    export { DateFormatter as default, DateFormatter, dateformat, getWeekOfYear, getDayName, standardMasks, standardMaskNames, i18n, I18n, DateFn };
 }
 /**
  * @param {string | number | Date} [date=new Date()]
@@ -286,7 +286,7 @@ declare namespace DateFormatter {
  * @param {boolean} [utc=false]
  * @param {boolean} [gmt=true]
  */
-declare function dateFormat(date?: string | number | Date, mask?: string, utc?: boolean, gmt?: boolean): string;
+declare function dateformat(date?: string | number | Date, mask?: string, utc?: boolean, gmt?: boolean): string;
 /**
  * Get the ISO 8601 week number for a given date.
  *

@@ -854,7 +854,7 @@ class DateFormatter {
  * @param {boolean} [utc=false]
  * @param {boolean} [gmt=true]
  */
-function dateFormat (date, mask, utc, gmt) {
+function dateformat (date, mask, utc, gmt) {
   if (typeof date === 'string' || typeof date === 'number') {
     date = new Date(date)
   }
@@ -889,7 +889,7 @@ function dateFormat (date, mask, utc, gmt) {
 module.exports = DateFormatter
 module.exports.default = DateFormatter
 module.exports.DateFormatter = DateFormatter
-module.exports.dateFormat = dateFormat
+module.exports.dateformat = dateformat
 module.exports.getWeekOfYear = getWeekOfYear
 module.exports.getDayName = getDayName
 module.exports.standardMasks = standardMasks
