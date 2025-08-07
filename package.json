@@ -1,6 +1,6 @@
 {
-  "name": "@pino/dateformat",
-  "version": "0.0.0",
+  "name": "@pinojs/dateformat",
+  "version": "1.0.0-rc.1",
   "description": "fast formatter for dates",
   "main": "index.js",
   "types": "index.d.ts",
