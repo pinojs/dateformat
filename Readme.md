@@ -1,14 +1,69 @@
 <a id="intro"></a>
-# @pino/dateformat
+# @pinojs/dateformat
 
-[![NPM Package Version](https://img.shields.io/npm/v/@pino/dateformat)](https://www.npmjs.com/package/@pino/dateformat)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/pinojs/dateformat/ci.yml?branch=master)](https://github.com/pinojs/dateformat/actions?query=workflow%3ACI))
+[![NPM Package Version](https://img.shields.io/npm/v/@pino/dateformat)](https://www.npmjs.com/package/@pinojs/dateformat)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/pinojs/dateformat/ci.yml?branch=main)](https://github.com/pinojs/dateformat/actions?query=workflow%3ACI)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
+This packages is a reimplementation of the original [dateformat](https://github.com/felixge/node-dateformat). It focuses on performance and simplicity, while maintaining compatibility with the original API. 
 
-### Mask options
+This package provides a `DateFormat` class that can be used to format dates in various ways. It supports a wide range of formatting options, including custom masks and named formats. While this package provides a `dateformat` function for convenience, it is recommended to use the `DateFormat` class directly for better performance and flexibility.
+While the `dateformat` function parses the mask-string on every call, the `DateFormat` class allows you to create a reusable instance with a pre-parsed mask. This can significantly improve performance when formatting dates multiple times with the same mask.
 
-| Mask             | Description                                                                                                                                                   |
+## Usage
+
+### `dateformat(mask, date, utc, gmt)`
+
+The `dateformat` function is a convenience function that allows you to format a date using a mask string. It accepts the following parameters:
+- `mask` (string): The format mask to use for formatting the date.
+- `date` (Date | number): The date to format. If a number is provided, it is treated as a timestamp.
+- `utc` (boolean, optional): If true, the date is formatted in UTC. Defaults to false.
+- `gmt` (boolean, optional): If true, the date is formatted in GMT. Defaults to false.
+
+#### Example:
+
+```javascript
+import { dateformat } from '@pinojs/dateformat';
+const formattedDate = dateformat('yyyy-mm-dd HH:MM:ss', new Date(0));
+console.log(formattedDate); // Outputs: "1970-01-01 00:00:00"
+```
+### `DateFormat(mask, mode)`
+
+The `DateFormat` class allows you to create a reusable date formatter instance with a pre-parsed mask. 
+
+It accepts the following parameters:
+- `mask` (string|function): The format mask to use for formatting the date.
+- `mode` (string, optional): The mode to use for formatting. Can be either 'UTC' or 'GMT'. Defaults to 'GMT'.
+
+If the `mask` is a string, it is tokenized and compiled into a function for efficient date formatting. If the `mask` is a function, it is used directly for formatting dates.
+
+The `mask` function should accept a `Date` object and return a formatted string. The `this` context of the function will be set to the `DateFormat` instance, allowing you to access instance methods.
+
+#### Example:
+
+With a string as `mask`:
+
+```javascript
+import { DateFormat } from '@pinojs/dateformat';
+const dateFormatter = new DateFormat('yyyy-mm-dd HH:MM:ss');
+const formattedDate = dateFormatter.format(new Date(0));
+console.log(formattedDate); // Outputs: "1970-01-01 00:00:00"
+```
+
+With a function as `mask`:
+
+```javascript
+import { DateFormat } from '@pinojs/dateformat';
+const dateFormatter = new DateFormat((date) => {
+  return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)}`;
+});
+const formattedDate = dateFormatter.format(new Date(0));
+console.log(formattedDate); // Outputs: "1970-01-01 00:00:00"
+```
+
+### Tokens
+
+| Token             | Description                                                                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `d`              | Day of the month as digits; no leading zero for single-digit days.                                                                                            |
 | `dd`             | Day of the month as digits; leading zero for single-digit days.                                                                                               |
@@ -42,7 +97,7 @@
 | `TT`             | Uppercase, two-character time marker string: AM or PM.                                                                                                        |
 | `W`              | ISO 8601 week number of the year, e.g. 4, 42                                                                                                                  |
 | `WW`             | ISO 8601 week number of the year, leading zero for single-digit, e.g. 04, 42                                                                                  |
-| `Z`              | US timezone abbreviation, e.g. EST or MDT. For non-US timezones, the GMT/UTC offset is returned, e.g. GMT-0500                                                |
+| `Z`              | The GMT-Offset is, e.g. GMT-0500, or if it is GMT-0000 it will be return UTC                                                |
 | `'...'`, `"..."` | Literal character sequence. Surrounding quotes are removed.                                                                                                   |
 | `UTC:`           | Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The "UTC:" prefix is removed. |
 
