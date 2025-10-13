@@ -879,6 +879,11 @@ function dateformat (date, mask, utc, gmt) {
       }
     }
   }
+  if (utc === true) {
+    mode = 'UTC'
+  } else if (gmt === true) {
+    mode = 'GMT'
+  }
   const dateFormatter = new DateFormatter(mask, mode)
   return dateFormatter.format(date)
 }
