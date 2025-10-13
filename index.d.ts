@@ -1,14 +1,38 @@
 export = DateFormatter;
-declare class DateFormatter {
+/** @typedef {'d'|'dd'|'ddd'|'dddd'|'DDD'|'DDDD'|'m'|'mm'|'mmm'|'mmmm'|'M'|'MM'|'h'|'hh'|'H'|'HH'|'l'|'L'|'o'|'p'|'N'|'s'|'ss'|'S'|'t'|'tt'|'T'|'TT'|'W'|'WW'|'yy'|'yyyy'|'Z'} FormatTokenType */
+/**
+ * @typedef {object} FormatToken
+ * @property {FormatTokenType} type
+ */
+/**
+ * @typedef {object} CustomToken
+ * @property {'custom'} type
+ * @property {string} value
+ */
+/** @typedef {FormatToken|CustomToken} Token */
+/**
+ * @class
+ * @implements {Record<FormatTokenType, (date: Date) => string>}
+ */
+declare class DateFormatter implements Record<FormatTokenType, (date: Date) => string> {
     /**
      * @param {string|((date: Date) => string)} mask
-     * @param {'UTC'|'GMT'} mode
+     * @param {DateMode} mode
      */
-    constructor(mask: string | ((date: Date) => string), mode?: "UTC" | "GMT");
-    i18n: I18n;
+    constructor(mask: string | ((date: Date) => string), mode?: DateMode);
+    i18n: {
+        readonly dayNamesShort: readonly ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        readonly dayNamesLong: readonly ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        readonly monthNamesShort: readonly ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        readonly monthNamesLong: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        readonly timeNames: readonly ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
+    };
     /**
-     * @returns {(date: Date) => string}
+     * @param {*} date
+     * @returns {Date}
      */
+    validateDate(date: any): Date;
+    /** @returns {(date: Date) => string} */
     get format(): (date: Date) => string;
     /**
      * Day of the month as digits; no leading zero for single-digit
@@ -278,7 +302,7 @@ declare class DateFormatter {
     #private;
 }
 declare namespace DateFormatter {
-    export { DateFormatter as default, DateFormatter, dateformat, getWeekOfYear, getDayName, standardMasks, standardMaskNames, i18n, I18n, DateFn };
+    export { DateFormatter as default, DateFormatter, dateformat, getWeekOfYear, getDayName, standardMasks, formatStandardMask, standardMaskNames, i18n, FixedLengthStringArray, I18n, DateMode, DateFnName, DefaultI18n, StandardMaskName, FormatTokenType, FormatToken, CustomToken, Token };
 }
 /**
  * @param {string | number | Date} [date=new Date()]
@@ -302,44 +326,80 @@ declare function getWeekOfYear(date: Date): number;
  * @param  {Date} options.date - The date
  * @param  {function} options.D - Function to get the day of the week (0-6)
  * @param  {boolean} options.short - Whether to return short names (Tdy, Ysd, Tmw)
- * @param  {I18n} options.i18n - Object containing i18n day names
+ * @param  {DefaultI18n|I18n} options.i18n - Object containing i18n day names
  * @return {string}
  */
 declare function getDayName({ date, D, short, i18n }: {
     date: Date;
     D: Function;
     short: boolean;
-    i18n: I18n;
+    i18n: DefaultI18n | I18n;
 }): string;
-declare const standardMasks: Record<"default" | "shortDate" | "paddedShortDate" | "mediumDate" | "longDate" | "fullDate" | "isoDate" | "shortTime" | "mediumTime" | "longTime" | "isoTime" | "isoDateTime" | "isoUtcDateTime" | "expiresHeaderFormat", (this: DateFormatter, date: Date) => string>;
+declare const standardMasks: Record<StandardMaskName, (this: DateFormatter, date: Date) => string>;
+/** @typedef {standardMaskNames[number]} StandardMaskName */
+declare const formatStandardMask: Record<string, StandardMaskName>;
 declare const standardMaskNames: readonly ["default", "shortDate", "paddedShortDate", "mediumDate", "longDate", "fullDate", "isoDate", "shortTime", "mediumTime", "longTime", "isoTime", "isoDateTime", "isoUtcDateTime", "expiresHeaderFormat"];
 declare namespace i18n {
-    let dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    let dayNamesLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    let monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    let monthNamesLong: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    let timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
+    let dayNamesShort: readonly ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    let dayNamesLong: readonly ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    let monthNamesShort: readonly ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let monthNamesLong: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let timeNames: readonly ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
 }
+type FixedLengthStringArray<L extends number> = Array<string> & {
+    readonly length: L;
+};
 type I18n = {
     /**
      * - Short names of the days of the week
      */
-    dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    dayNamesShort: FixedLengthStringArray<7>;
     /**
      * - Long names of the days of the week
      */
-    dayNamesLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    dayNamesLong: FixedLengthStringArray<7>;
     /**
      * - Short names of the months
      */
-    monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    monthNamesShort: FixedLengthStringArray<12>;
     /**
      * - Long names of the months
      */
-    monthNamesLong: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    monthNamesLong: FixedLengthStringArray<12>;
     /**
      * - Time names (am, pm, etc.)
      */
-    timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
+    timeNames: FixedLengthStringArray<8>;
 };
-type DateFn = "getDate" | "getDay" | "getMonth" | "getFullYear" | "getHours" | "getMinutes" | "getSeconds" | "getMilliseconds" | "getTimezoneOffset";
+type DateMode = "UTC" | "GMT";
+type DateFnName = "getDate" | "getDay" | "getMonth" | "getFullYear" | "getHours" | "getMinutes" | "getSeconds" | "getMilliseconds" | "getTimezoneOffset";
+type DefaultI18n = ReturnType<typeof getI18n>;
+type StandardMaskName = "default" | "shortDate" | "paddedShortDate" | "mediumDate" | "longDate" | "fullDate" | "isoDate" | "shortTime" | "mediumTime" | "longTime" | "isoTime" | "isoDateTime" | "isoUtcDateTime" | "expiresHeaderFormat";
+type FormatTokenType = "d" | "dd" | "ddd" | "dddd" | "DDD" | "DDDD" | "m" | "mm" | "mmm" | "mmmm" | "M" | "MM" | "h" | "hh" | "H" | "HH" | "l" | "L" | "o" | "p" | "N" | "s" | "ss" | "S" | "t" | "tt" | "T" | "TT" | "W" | "WW" | "yy" | "yyyy" | "Z";
+type FormatToken = {
+    type: FormatTokenType;
+};
+type CustomToken = {
+    type: "custom";
+    value: string;
+};
+type Token = FormatToken | CustomToken;
+/**
+ * @template {number} L
+ * @typedef {Array<string> & {readonly length: L}} FixedLengthStringArray
+ */
+/**
+ * @typedef {Object} I18n
+ * @property {FixedLengthStringArray<7>} dayNamesShort - Short names of the days of the week
+ * @property {FixedLengthStringArray<7>} dayNamesLong - Long names of the days of the week
+ * @property {FixedLengthStringArray<12>} monthNamesShort - Short names of the months
+ * @property {FixedLengthStringArray<12>} monthNamesLong - Long names of the months
+ * @property {FixedLengthStringArray<8>} timeNames - Time names (am, pm, etc.)
+ */
+declare function getI18n(): {
+    readonly dayNamesShort: readonly ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    readonly dayNamesLong: readonly ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    readonly monthNamesShort: readonly ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    readonly monthNamesLong: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    readonly timeNames: readonly ["a", "p", "am", "pm", "A", "P", "AM", "PM"];
+};

@@ -9,7 +9,9 @@
     "delete:types": "node -e \"import { rmSync } from 'fs'; try {rmSync('./index.d.ts'); } catch {} \"",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "node --test",
+    "test": "npm run test:eval && npm run test:no-eval",
+    "test:eval": "node --test",
+    "test:no-eval": "node --disallow-code-generation-from-strings --test",
     "test:coverage": "c8 --reporter=html npm test"
   },
   "repository": {
