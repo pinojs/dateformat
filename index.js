@@ -1,5 +1,16 @@
 'use strict'
 
+// Detect if environment supports generating functions from strings.
+const canGenerateFunctionsFromStrings = (() => {
+  try {
+    // eslint-disable-next-line no-new-func, no-new
+    new Function('return true')
+    return true
+  } catch {
+    return false
+  }
+})()
+
 const DATE_SUFFIX = /** @type {const} */([
   'th',
   'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
@@ -38,13 +49,15 @@ for (let tzOffset = -720; tzOffset <= 840; tzOffset += 15) {
 
 const DAY_OF_WEEK = /** @type {const} */(['7', '1', '2', '3', '4', '5', '6'])
 
+/** @typedef {'UTC'|'GMT'} DateMode */
+
 /**
  * @typedef {'getDate'|'getDay'|'getMonth'|'getFullYear'|
  * 'getHours'|'getMinutes'| 'getSeconds'| 'getMilliseconds'|
- * 'getTimezoneOffset'} DateFn
+ * 'getTimezoneOffset'} DateFnName
  */
 
-/** @type {Record<DateFn, ((date: Date) => number)>} */
+/** @type {Record<DateFnName, ((date: Date) => number)>} */
 const UTC_FNS = {
   getDate: Date.prototype.getUTCDate.call.bind(Date.prototype.getUTCDate),
   getDay: Date.prototype.getUTCDay.call.bind(Date.prototype.getUTCDay),
@@ -57,7 +70,7 @@ const UTC_FNS = {
   getTimezoneOffset: () => 0, // UTC does not have a timezone offset
 }
 
-/** @type {Record<DateFn, ((date: Date) => number)>} */
+/** @type {Record<DateFnName, ((date: Date) => number)>} */
 const GMT_FNS = {
   getDate: Date.prototype.getDate.call.bind(Date.prototype.getDate),
   getDay: Date.prototype.getDay.call.bind(Date.prototype.getDay),
@@ -71,16 +84,21 @@ const GMT_FNS = {
 }
 
 /**
+ * @template {number} L
+ * @typedef {Array<string> & {readonly length: L}} FixedLengthStringArray
+ */
+
+/**
  * @typedef {Object} I18n
- * @property {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']} dayNamesShort - Short names of the days of the week
- * @property {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']} dayNamesLong - Long names of the days of the week
- * @property {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']} monthNamesShort - Short names of the months
- * @property {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']} monthNamesLong - Long names of the months
- * @property {['a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM']} timeNames - Time names (am, pm, etc.)
+ * @property {FixedLengthStringArray<7>} dayNamesShort - Short names of the days of the week
+ * @property {FixedLengthStringArray<7>} dayNamesLong - Long names of the days of the week
+ * @property {FixedLengthStringArray<12>} monthNamesShort - Short names of the months
+ * @property {FixedLengthStringArray<12>} monthNamesLong - Long names of the months
+ * @property {FixedLengthStringArray<8>} timeNames - Time names (am, pm, etc.)
  */
 
 function getI18n () {
-  return /** @type {I18n} */ ({
+  return /** @type {const} */ ({
     dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     dayNamesLong: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -89,14 +107,13 @@ function getI18n () {
   })
 }
 
-/** @type {Map<number, Date>} */
-const firstThursdays = new Map()
+/** @typedef {ReturnType<typeof getI18n>} DefaultI18n */
 
-/** @type {(1|2|3|4|5|6|7)[]} */
-const FIRST_DAYS_OF_WEEK = [1, 7, 6, 5, 4, 3, 2]
+const firstThursdays = /** @type {Map<number, Date>} */ (new Map())
 
-/** @type {(0|1|2|3|4|5|6)[]} */
-const THURSDAY_SAME_WEEK = [6, 0, 1, 2, 3, 4, 5]
+const FIRST_DAYS_OF_WEEK = /** @type {const} */ ([1, 7, 6, 5, 4, 3, 2])
+
+const THURSDAY_SAME_WEEK = /** @type {const} */ ([6, 0, 1, 2, 3, 4, 5])
 
 /**
  * Get the ISO 8601 week number for a given date.
@@ -151,7 +168,7 @@ const getWeekOfYear = (date) => {
  * @param  {Date} options.date - The date
  * @param  {function} options.D - Function to get the day of the week (0-6)
  * @param  {boolean} options.short - Whether to return short names (Tdy, Ysd, Tmw)
- * @param  {I18n} options.i18n - Object containing i18n day names
+ * @param  {DefaultI18n|I18n} options.i18n - Object containing i18n day names
  * @return {string}
  */
 const getDayName = ({ date, D, short, i18n }) => {
@@ -189,27 +206,76 @@ const standardMaskNames = /** @type {const} */([
   'expiresHeaderFormat'
 ])
 
-const standardMasks = /** @type {Record<standardMaskNames[number], (this: DateFormatter, date:Date) => string>} */ ({
-  default: function (date) { return `${this.ddd(date)} ${this.mmm(date)} ${this.dd(date)} ${this.yyyy(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)}` },
-  shortDate: function (date) { return `${this.m(date)}/${this.d(date)}/${this.yy(date)}` },
-  paddedShortDate: function (date) { return `${this.mm(date)}/${this.dd(date)}/${this.yyyy(date)}` },
-  mediumDate: function (date) { return `${this.mmm(date)} ${this.d(date)}, ${this.yyyy(date)}` },
-  longDate: function (date) { return `${this.mmmm(date)} ${this.d(date)}, ${this.yyyy(date)}` },
-  fullDate: function (date) { return `${this.dddd(date)}, ${this.mmmm(date)} ${this.d(date)}, ${this.yyyy(date)}` },
-  shortTime: function (date) { return `${this.h(date)}:${this.MM(date)} ${this.TT(date)}` },
-  mediumTime: function (date) { return `${this.h(date)}:${this.MM(date)}:${this.ss(date)} ${this.TT(date)}` },
-  longTime: function (date) { return `${this.h(date)}:${this.MM(date)}:${this.ss(date)} ${this.TT(date)} ${this.Z(date)}` },
-  isoDate: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}` },
-  isoTime: function (date) { return `${this.HH(date)}:${this.MM(date)}:${this.ss(date)}` },
-  isoDateTime: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}${this.o(date)}` },
-  isoUtcDateTime: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}Z` },
-  expiresHeaderFormat: function (date) { return `${this.ddd(date)}, ${this.dd(date)} ${this.mmm(date)} ${this.yyyy(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)} ${this.Z(date)}` },
+/** @typedef {standardMaskNames[number]} StandardMaskName */
+
+const formatStandardMask = /** @type {Record<string, (this: DateFormatter, date:Date) => string>} */({
+  'ddd mmm dd yyyy HH:MM:ss': function (date) { return `${this.ddd(date)} ${this.mmm(date)} ${this.dd(date)} ${this.yyyy(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)}` },
+  'm/d/yy': function (date) { return `${this.m(date)}/${this.d(date)}/${this.yy(date)}` },
+  'mm/dd/yyyy': function (date) { return `${this.mm(date)}/${this.dd(date)}/${this.yyyy(date)}` },
+  'mmm d, yyyy': function (date) { return `${this.mmm(date)} ${this.d(date)}, ${this.yyyy(date)}` },
+  'mmmm d, yyyy': function (date) { return `${this.mmmm(date)} ${this.d(date)}, ${this.yyyy(date)}` },
+  'dddd, mmmm d, yyyy': function (date) { return `${this.dddd(date)}, ${this.mmmm(date)} ${this.d(date)}, ${this.yyyy(date)}` },
+  'h:MM TT': function (date) { return `${this.h(date)}:${this.MM(date)} ${this.TT(date)}` },
+  'h:MM:ss TT': function (date) { return `${this.h(date)}:${this.MM(date)}:${this.ss(date)} ${this.TT(date)}` },
+  'h:MM:ss TT Z': function (date) { return `${this.h(date)}:${this.MM(date)}:${this.ss(date)} ${this.TT(date)} ${this.Z(date)}` },
+  'yyyy-mm-dd': function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}` },
+  'HH:MM:ss': function (date) { return `${this.HH(date)}:${this.MM(date)}:${this.ss(date)}` },
+  "yyyy-mm-dd'T'HH:MM:sso": function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}${this.o(date)}` },
+  "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'": function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}Z` },
+  'ddd, dd mmm yyyy HH:MM:ss Z': function (date) { return `${this.ddd(date)}, ${this.dd(date)} ${this.mmm(date)} ${this.yyyy(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)} ${this.Z(date)}` },
+  'yyyy-mm-dd HH:MM:ss.l o': function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)}.${this.l(date)} ${this.o(date)}` },
+  'HH:MM:ss.l': function (date) { return `${this.HH(date)}:${this.MM(date)}:${this.ss(date)}.${this.l(date)}` },
 })
 
+const standardMasks = /** @type {Record<StandardMaskName, string>} */ ({
+  default: 'ddd mmm dd yyyy HH:MM:ss',
+  shortDate: 'm/d/yy',
+  paddedShortDate: 'mm/dd/yyyy',
+  mediumDate: 'mmm d, yyyy',
+  longDate: 'mmmm d, yyyy',
+  fullDate: 'dddd, mmmm d, yyyy',
+  isoTime: 'HH:MM:ss',
+  isoDate: 'yyyy-mm-dd',
+  shortTime: 'h:MM TT',
+  mediumTime: 'h:MM:ss TT',
+  longTime: 'h:MM:ss TT Z',
+  isoDateTime: "yyyy-mm-dd'T'HH:MM:sso",
+  isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'",
+  expiresHeaderFormat: 'ddd, dd mmm yyyy HH:MM:ss Z'
+})
+
+const formatTokenTypes = /** @type {const} */ ([
+  'd', 'dd', 'ddd', 'dddd', 'DDD', 'DDDD', 'm', 'mm', 'mmm', 'mmmm', 'M', 'MM',
+  'h', 'hh', 'H', 'HH', 's', 'ss', 'S', 't', 'tt', 'T', 'TT', 'l', 'L', 'o',
+  'p', 'N', 'W', 'WW', 'yy', 'yyyy', 'Z'
+])
+/** @typedef {typeof formatTokenTypes[number]} FormatTokenType */
+
+/**
+ * @param {string} value
+ * @returns {value is FormatTokenType}
+ */
+function isFormatTokenType (value) {
+  return formatTokenTypes.includes(/** @type {*} */(value))
+}
+
+/**
+ * @typedef {object} FormatToken
+ * @property {FormatTokenType} type
+ */
+/**
+ * @typedef {object} CustomToken
+ * @property {'custom'} type
+ * @property {string} value
+ */
+/** @typedef {FormatToken|CustomToken} Token */
+
+/**
+ * @class
+ * @implements {Record<FormatTokenType, (date: Date) => string>}
+ */
 class DateFormatter {
-  /**
-   * @type {'GMT'|'UTC'}
-   */
+  /** @type {DateMode} */
   #mode = 'GMT'
 
   #mask = ''
@@ -224,30 +290,19 @@ class DateFormatter {
   #s = GMT_FNS.getSeconds
   #yyyy = GMT_FNS.getFullYear
 
-  /** @type {((date: Date) => string)[]} */
-  #tokenFns = []
+  /** @type {Array<Token>} */
+  #tokens = []
 
   i18n = getI18n()
 
-  /**
-   * @param {Date} date
-   * @returns {string}
-   */
+  /** @type {(date: Date) => string} */
   #format = (date) => {
-    date = this.#validateDate(date)
-
-    let result = ''
-
-    for (let i = 0; i < this.#tokenFns.length; ++i) {
-      result += this.#tokenFns[i](date)
-    }
-
-    return result
+    throw Error('Format function not generated')
   }
 
   /**
    * @param {string|((date: Date) => string)} mask
-   * @param {'UTC'|'GMT'} mode
+   * @param {DateMode} mode
    */
   constructor (mask, mode = 'GMT') {
     if (typeof mode === 'string') {
@@ -280,16 +335,19 @@ class DateFormatter {
     }
 
     if (typeof mask === 'string') {
-      if (standardMaskNames.includes(/** @type {*} */(mask))) {
-        this.#format = standardMasks[mask]
+      if (mask in formatStandardMask) {
+        this.#format = formatStandardMask[mask]
+      } else if (standardMaskNames.includes(/** @type {*} */(mask))) {
+        this.#format = formatStandardMask[standardMasks[mask]]
       } else {
         this.#mask = mask
         this.#tokenize()
+        this.#generateFormatFunctionFromTokens()
       }
     } else if (typeof mask === 'function') {
       this.#format = mask
     } else if (typeof mask === 'undefined') {
-      this.#format = standardMasks.default
+      this.#format = formatStandardMask[standardMasks.default]
     } else {
       throw TypeError('Mask must be a string or a function')
     }
@@ -313,130 +371,69 @@ class DateFormatter {
     let pos = 0
     while ((match = tokenRE.exec(this.#mask)) != null) {
       if (pos !== match.index) {
-        const token = this.#mask.slice(pos, match.index)
-        this.#tokenFns.push(() => token)
+        this.#tokens.push({ type: 'custom', value: this.#mask.slice(pos, match.index) })
       }
-      switch (match[0]) {
-        case 'd':
-          this.#tokenFns.push(this.d.bind(this))
-          break
-        case 'dd':
-          this.#tokenFns.push(this.dd.bind(this))
-          break
-        case 'ddd':
-          this.#tokenFns.push(this.ddd.bind(this))
-          break
-        case 'dddd':
-          this.#tokenFns.push(this.dddd.bind(this))
-          break
-        case 'DDD':
-          this.#tokenFns.push(this.DDD.bind(this))
-          break
-        case 'DDDD':
-          this.#tokenFns.push(this.DDDD.bind(this))
-          break
-        case 'h':
-          this.#tokenFns.push(this.h.bind(this))
-          break
-        case 'hh':
-          this.#tokenFns.push(this.hh.bind(this))
-          break
-        case 'H':
-          this.#tokenFns.push(this.H.bind(this))
-          break
-        case 'HH':
-          this.#tokenFns.push(this.HH.bind(this))
-          break
-        case 'l':
-          this.#tokenFns.push(this.l.bind(this))
-          break
-        case 'L':
-          this.#tokenFns.push(this.L.bind(this))
-          break
-        case 'm':
-          this.#tokenFns.push(this.m.bind(this))
-          break
-        case 'mm':
-          this.#tokenFns.push(this.mm.bind(this))
-          break
-        case 'mmm':
-          this.#tokenFns.push(this.mmm.bind(this))
-          break
-        case 'mmmm':
-          this.#tokenFns.push(this.mmmm.bind(this))
-          break
-        case 'M':
-          this.#tokenFns.push(this.M.bind(this))
-          break
-        case 'MM':
-          this.#tokenFns.push(this.MM.bind(this))
-          break
-        case 'N':
-          this.#tokenFns.push(this.N.bind(this))
-          break
-        case 'o':
-          this.#tokenFns.push(this.o.bind(this))
-          break
-        case 'p':
-          this.#tokenFns.push(this.p.bind(this))
-          break
-        case 's':
-          this.#tokenFns.push(this.s.bind(this))
-          break
-        case 'ss':
-          this.#tokenFns.push(this.ss.bind(this))
-          break
-        case 'S':
-          this.#tokenFns.push(this.S.bind(this))
-          break
-        case 't':
-          this.#tokenFns.push(this.t.bind(this))
-          break
-        case 'tt':
-          this.#tokenFns.push(this.tt.bind(this))
-          break
-        case 'T':
-          this.#tokenFns.push(this.T.bind(this))
-          break
-        case 'TT':
-          this.#tokenFns.push(this.TT.bind(this))
-          break
-        case 'W':
-          this.#tokenFns.push(this.W.bind(this))
-          break
-        case 'WW':
-          this.#tokenFns.push(this.WW.bind(this))
-          break
-        case 'yy':
-          this.#tokenFns.push(this.yy.bind(this))
-          break
-        case 'yyyy':
-          this.#tokenFns.push(this.yyyy.bind(this))
-          break
-        case 'Z':
-          this.#tokenFns.push(this.Z.bind(this))
-          break
-        default:
-          if (
-            (match[0][0] === '\'' && match[0][match[0].length - 1] === '\'') ||
-            (match[0][0] === '"' && match[0][match[0].length - 1] === '"')
-          ) {
-            const token = match[0].slice(1, -1)
-            this.#tokenFns.push(() => token)
-            break
-          }
-          console.log('Unknown token:', match[0])
+      if (isFormatTokenType(match[0])) {
+        this.#tokens.push({ type: match[0] })
+      } else if (
+        (match[0][0] === '\'' && match[0][match[0].length - 1] === '\'') ||
+        (match[0][0] === '"' && match[0][match[0].length - 1] === '"')
+      ) {
+        this.#tokens.push({ type: 'custom', value: match[0].slice(1, -1) })
+      } else {
+        console.log('Unknown token:', match[0])
       }
       pos = tokenRE.lastIndex
     }
 
     if (pos !== this.#mask.length) {
-      const token = this.#mask.slice(pos)
-      this.#tokenFns.push(() => token)
+      this.#tokens.push({ type: 'custom', value: this.#mask.slice(pos) })
     }
   }
 
-  #validateDate (date) {
+  #generateFormatFunctionFromTokens () {
+    if (canGenerateFunctionsFromStrings) {
+      let fnBody = 'date = this.validateDate(date)\n'
+      fnBody += 'return `'
+      for (const token of this.#tokens) {
+        if (token.type === 'custom') {
+          fnBody += token.value.replaceAll('`', '\\`')
+        } else {
+          fnBody += '${this.' + token.type + '(date)}'
+        }
+      }
+      fnBody += '`'
+      // eslint-disable-next-line no-new-func
+      this.#format = new Function('date', fnBody).bind(this)
+      return
+    }
+
+    const tokenFns = this.#tokens.map(token => {
+      if (token.type === 'custom') {
+        return () => token.value
+      } else {
+        return this[token.type].bind(this)
+      }
+    })
+
+    this.#format = (date) => {
+      date = this.validateDate(date)
+
+      let result = ''
+
+      for (let i = 0; i < tokenFns.length; ++i) {
+        result += tokenFns[i](date)
+      }
+
+      return result
+    }
+  }
+
+  /**
+   * @param {*} date
+   * @returns {Date}
+   */
+  validateDate (date) {
     if (date instanceof Date) {
       if (Number.isNaN(date.getTime())) {
         throw TypeError('Invalid date')
@@ -454,9 +451,7 @@ class DateFormatter {
     return date
   }
 
-  /**
-   * @returns {(date: Date) => string}
-   */
+  /** @returns {(date: Date) => string} */
   get format () {
     return this.#format
   }
@@ -860,7 +855,7 @@ function dateformat (date, mask, utc, gmt) {
   if (typeof date === 'string' || typeof date === 'number') {
     date = new Date(date)
   }
-  /** @type {'UTC'|'GMT'} */
+  /** @type {DateMode} */
   let mode = 'GMT'
   if (typeof mask === 'string') {
     if (mask === 'isoUtcDateTime') {
@@ -895,6 +890,7 @@ module.exports.dateformat = dateformat
 module.exports.getWeekOfYear = getWeekOfYear
 module.exports.getDayName = getDayName
 module.exports.standardMasks = standardMasks
+module.exports.formatStandardMask = formatStandardMask
 module.exports.standardMaskNames = standardMaskNames
 
 Object.defineProperty(module.exports, 'i18n', {

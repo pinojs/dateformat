@@ -5,53 +5,53 @@ const { standardMasks, standardMaskNames } = require('../index.js')
 
 describe('standardMasks', () => {
   it('should have a default mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.default, 'function')
+    t.assert.strictEqual(typeof standardMasks.default, 'string')
   })
 
   it('should have a shortDate mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.shortDate, 'function')
+    t.assert.strictEqual(typeof standardMasks.shortDate, 'string')
   })
 
   it('should have a paddedShortDate mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.paddedShortDate, 'function')
+    t.assert.strictEqual(typeof standardMasks.paddedShortDate, 'string')
   })
 
   it('should have a mediumDate mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.mediumDate, 'function')
+    t.assert.strictEqual(typeof standardMasks.mediumDate, 'string')
   })
 
   it('should have a longDate mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.longDate, 'function')
+    t.assert.strictEqual(typeof standardMasks.longDate, 'string')
   })
 
   it('should have a fullDate mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.fullDate, 'function')
+    t.assert.strictEqual(typeof standardMasks.fullDate, 'string')
   })
 
   it('should have an isoDate mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.isoDate, 'function')
+    t.assert.strictEqual(typeof standardMasks.isoDate, 'string')
   })
 
   it('should have a shortTime mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.shortTime, 'function')
+    t.assert.strictEqual(typeof standardMasks.shortTime, 'string')
   })
   it('should have a mediumTime mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.mediumTime, 'function')
+    t.assert.strictEqual(typeof standardMasks.mediumTime, 'string')
   })
   it('should have a longTime mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.longTime, 'function')
+    t.assert.strictEqual(typeof standardMasks.longTime, 'string')
   })
   it('should have an isoTime mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.isoTime, 'function')
+    t.assert.strictEqual(typeof standardMasks.isoTime, 'string')
   })
   it('should have an isoDateTime mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.isoDateTime, 'function')
+    t.assert.strictEqual(typeof standardMasks.isoDateTime, 'string')
   })
   it('should have an isoUtcDateTime mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.isoUtcDateTime, 'function')
+    t.assert.strictEqual(typeof standardMasks.isoUtcDateTime, 'string')
   })
   it('should have an expiresHeaderFormat mask', (t) => {
-    t.assert.strictEqual(typeof standardMasks.expiresHeaderFormat, 'function')
+    t.assert.strictEqual(typeof standardMasks.expiresHeaderFormat, 'string')
   })
   it('should have standardMaskNames defined', (t) => {
     t.assert.ok(Array.isArray(standardMaskNames))
