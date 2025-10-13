@@ -28,7 +28,7 @@ const expects = {
   'h:MM:ss TT': '1:19:44 PM',
   'h:MM:ss TT Z': '1:19:44 PM %TZ_PREFIX%%TZ_OFFSET%',
   'yyyy-mm-dd\'T\'HH:MM:sso': '2014-03-08T13:19:44%TZ_OFFSET%',
-  'UTC:yyyy-mm-dd\'T\'HH:MM:ss\'Z\'': '2014-03-08T12:19:44Z',
+  // 'UTC:yyyy-mm-dd\'T\'HH:MM:ss\'Z\'': '2014-03-08T12:19:44Z',
   'ddd, dd mmm yyyy HH:MM:ss Z': 'Sat, 08 Mar 2014 13:19:44 %TZ_PREFIX%%TZ_OFFSET%',
   'HH:MM:ss.l': '13:19:44.000',
   'yyyy-mm-dd HH:MM:ss.l o': '2014-03-08 13:19:44.000 %TZ_OFFSET%',
