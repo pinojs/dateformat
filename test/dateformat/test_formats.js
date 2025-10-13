@@ -16,6 +16,8 @@ const expects = {
   isoDateTime: '2014-03-08T13:19:44%TZ_OFFSET%',
   isoUtcDateTime: '',
   expiresHeaderFormat: 'Sat, 08 Mar 2014 13:19:44 %TZ_PREFIX%%TZ_OFFSET%',
+  extendedIsoDateTime: '2014-03-08T13:19:44.000 %TZ_OFFSET%',
+  extendedIsoTime: '13:19:44.000',
 }
 
 function pad (num, size) {

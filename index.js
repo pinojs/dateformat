@@ -184,6 +184,7 @@ const getDayName = ({ date, D, short, i18n }) => {
 const standardMaskNames = /** @type {const} */([
   'default',
   'shortDate', 'paddedShortDate', 'mediumDate', 'longDate', 'fullDate', 'isoDate',
+  'extendedIsoTime', 'extendedIsoDateTime', 
   'shortTime', 'mediumTime', 'longTime', 'isoTime',
   'isoDateTime', 'isoUtcDateTime',
   'expiresHeaderFormat'
@@ -201,7 +202,9 @@ const standardMasks = /** @type {Record<standardMaskNames[number], (this: DateFo
   longTime: function (date) { return `${this.h(date)}:${this.MM(date)}:${this.ss(date)} ${this.TT(date)} ${this.Z(date)}` },
   isoDate: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}` },
   isoTime: function (date) { return `${this.HH(date)}:${this.MM(date)}:${this.ss(date)}` },
+  extendedIsoTime: function (date) { return `${this.HH(date)}:${this.MM(date)}:${this.ss(date)}.${this.l(date)}` },
   isoDateTime: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}${this.o(date)}` },
+  extendedIsoDateTime: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}.${this.l(date)} ${this.o(date)}` },
   isoUtcDateTime: function (date) { return `${this.yyyy(date)}-${this.mm(date)}-${this.dd(date)}T${this.HH(date)}:${this.MM(date)}:${this.ss(date)}Z` },
   expiresHeaderFormat: function (date) { return `${this.ddd(date)}, ${this.dd(date)} ${this.mmm(date)} ${this.yyyy(date)} ${this.HH(date)}:${this.MM(date)}:${this.ss(date)} ${this.Z(date)}` },
 })
